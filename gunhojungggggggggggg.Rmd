@@ -1,0 +1,133 @@
+#  Dataset Description
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(gridExtra)
+library(reshape2)
+library(plotly)
+library(GGally)
+library(forcats)
+library(shiny)
+library(dplyr)
+# Load in dataset
+dat <- read_csv("https://raw.githubusercontent.com/gunhojung/315_final_project/master/new%20countries%202.csv")
+
+# Observe data
+str(dat)
+head(dat)
+tail(dat)
+```
+
+# Data Cleaning & administrative stuff
+
+```{r}
+# Rename column names in dataset
+dat <- dat %>% 
+  dplyr::rename(area = `Area..sq..mi..`,
+         pop_density = `Pop..Density..per.sq..mi..`,
+         coast_area_ratio = `Coastline..coast.area.ratio.`,
+         net_migration = `Net.migration`,
+         infant_mortality = `Infant.mortality..per.1000.births.`,
+         gdp_per_capita = `GDP....per.capita.`,
+         literacy = `Literacy....`,
+         phones = `Phones..per.1000.`,
+         arable = `Arable....`,
+         crops = `Crops....`,
+         other = `Other....`)
+names(dat) %<>% tolower
+```
+
+#  Creating Scatterplot
+
+```{r}
+#  GDP Per Capita by Sector (Agriculture, Industry, Service) within Regions
+#  Have points separated by region through shiny function
+#  Have hover effect on each point (shows x, y values for each points)
+#  Question: Globally, it seems that Service sector contributes greatly to the increase of GDP per Capita. Is it true for all the regions? Or does it differ among regions? ----- SELECTING ONLY ASIA Region -------
+shinyApp(
+  ui = fluidPage(
+    inputPanel(
+      
+      radioButtons("which_variable", label = "Economic Sector",
+                   choices = c("Agriculture" = "agriculture * 100",
+                               "Industry" = "industry * 100",
+                               "Service" = "service * 100")),
+      
+      checkboxGroupInput("which_region", label = "Which Regions?",
+                         choices = c("Asia" = "ASIA",
+                               "Baltics" = "BALTICS",
+                               "Commonwealth of Independent States" = "CIS",
+                               "Eastern Europe" = "EASTERN EUROPE",
+                               "Latin America/Caribbean" = "LATIN AMER. & CARIB",
+                               "Near East" = "NEAR EAST",
+                               "Northern Africa" = "NORTHERN AFRICA",
+                               "Northern America" = "NORTHERN AMERICA",
+                               "Oceania" = "OCEANIA",
+                               "Sub-Saharan Africa" = "SUB-SAHARAN AFRICA",
+                               "Western Europe" = "WESTERN EUROPE")),
+      
+      sliderInput("point_size", label = "Point size:",
+                  min = 0.5, max = 3, value = 2, step = 0.5)
+      
+      ),
+    
+    plotOutput("sector_plot")
+    ),
+  server = function(input, output) {
+    output$sector_plot <- renderPlot({
+      sector_p <- ggplot(subset(dat, region %in% c(input$which_region))) +
+                           geom_point(aes_string(x = input$which_variable, y = "gdp_per_capita"), 
+                                      size = input$point_size, alpha = 0.5) +
+                           scale_y_continuous(limits = c(0, 56000)) +
+                           geom_smooth(aes_string(x = input$which_variable, y = "gdp_per_capita"), 
+                                       method = "lm", na.rm = TRUE) +
+                           labs(title = "GDP per Capita by Economic Sector",
+                                x = "Economic Factor",
+                                y = "GDP per Capita")
+      sector_p
+    })
+  }
+)
+```
+
+#  Creating Heatmap
+```{r}
+#  Correlation between unemployment and other economic fctors
+#colnames(dat)
+cont_cols <- which(names(dat) %in% 
+                      c("unemployment", "net_migration", "pop_density",
+                        "gdp_per_capita", "literacy", "agriculture", 
+                        "industry", "service"))
+dat_cont <- dat[, cont_cols]
+# now I need to get rid of NA values
+correlation_matrix <- cor(dat_cont, use = "pairwise.complete.obs")
+
+get_lower_tri<-function(cormat){
+    cormat[upper.tri(cormat)] <- NA
+    return(cormat)
+}
+
+lo_tri <- correlation_matrix %>% get_lower_tri %>% melt
+lo_tri$value <- round(lo_tri$value,2)
+cormat_plot <- ggplot(data = lo_tri, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(limits = c(-1,1), 
+                       low = "blue", high = "orangered3") +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  scale_x_discrete(labels = c("unemployment" = "Unemployment", "net_migration" = "Net Migration",
+                              "pop_density" = "Population Density", "gdp_per_capita" = "GDP per Capita",
+                              "literacy" = "Literacy", "agriculture" = "Agriculture",
+                              "industry" = "Industry", "service" = "Service")) +
+  scale_y_discrete(labels = c("unemployment" = "Unemployment", "net_migration" = "Net Migration",
+                              "pop_density" = "Population Density", "gdp_per_capita" = "GDP per Capita",
+                              "literacy" = "Literacy", "agriculture" = "Agriculture",
+                              "industry" = "Industry", "service" = "Service")) +
+  labs(title = "Correlation Heat Map of Economic Factors",
+       x = "Economic Factor",
+       y = "Economic Factor") +
+  theme(plot.margin = margin(10, 10, 25, 10))
+ggplotly(cormat_plot)
+```
+
+#  Question: Does all graph have to be interactive?
