@@ -49,12 +49,12 @@ shinyApp(
   ui = fluidPage(
     inputPanel(
       
-      radioButtons("which_variable", label = "Economic Sector",
+      radioButtons("gunho_variable", label = "Economic Sector",
                    choices = c("Agriculture" = "agriculture * 100",
                                "Industry" = "industry * 100",
                                "Service" = "service * 100")),
       
-      checkboxGroupInput("which_region", label = "Which Regions?",
+      checkboxGroupInput("gunho_region", label = "gunho Regions?",
                          choices = c("Asia" = "ASIA",
                                "Baltics" = "BALTICS",
                                "Commonwealth of Independent States" = "CIS",
@@ -76,11 +76,11 @@ shinyApp(
     ),
   server = function(input, output) {
     output$sector_plot <- renderPlot({
-      sector_p <- ggplot(subset(country_df, region %in% c(input$which_region))) +
-                           geom_point(aes_string(x = input$which_variable, y = "gdp_per_capita"), 
+      sector_p <- ggplot(subset(country_df, region %in% c(input$gunho_region))) +
+                           geom_point(aes_string(x = input$gunho_variable, y = "gdp_per_capita"), 
                                       size = input$point_size, alpha = 0.5) +
                            scale_y_continuous(limits = c(0, 56000)) +
-                           geom_smooth(aes_string(x = input$which_variable, y = "gdp_per_capita"), 
+                           geom_smooth(aes_string(x = input$gunho_variable, y = "gdp_per_capita"), 
                                        method = "lm", na.rm = TRUE) +
                            labs(title = "GDP per Capita by Economic Sector",
                                 x = "Economic Factor",
