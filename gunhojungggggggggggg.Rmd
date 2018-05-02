@@ -1,6 +1,11 @@
+---
+title: "f.p."
+output: html_document
+---
+
 #  Dataset Description
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 library(tidyverse)
 library(magrittr)
 library(gridExtra)
@@ -11,19 +16,14 @@ library(forcats)
 library(shiny)
 library(dplyr)
 # Load in dataset
-dat <- read_csv("https://raw.githubusercontent.com/gunhojung/315_final_project/master/new%20countries%202.csv")
-
-# Observe data
-str(dat)
-head(dat)
-tail(dat)
+country_df <- read_csv("https://raw.githubusercontent.com/gunhojung/315_final_project/master/new%20countries%202.csv")
 ```
 
 # Data Cleaning & administrative stuff
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 # Rename column names in dataset
-dat <- dat %>% 
+country_df <- country_df %>% 
   dplyr::rename(area = `Area..sq..mi..`,
          pop_density = `Pop..Density..per.sq..mi..`,
          coast_area_ratio = `Coastline..coast.area.ratio.`,
@@ -35,12 +35,12 @@ dat <- dat %>%
          arable = `Arable....`,
          crops = `Crops....`,
          other = `Other....`)
-names(dat) %<>% tolower
+names(country_df) %<>% tolower
 ```
 
 #  Creating Scatterplot
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 #  GDP Per Capita by Sector (Agriculture, Industry, Service) within Regions
 #  Have points separated by region through shiny function
 #  Have hover effect on each point (shows x, y values for each points)
@@ -76,7 +76,7 @@ shinyApp(
     ),
   server = function(input, output) {
     output$sector_plot <- renderPlot({
-      sector_p <- ggplot(subset(dat, region %in% c(input$which_region))) +
+      sector_p <- ggplot(subset(country_df, region %in% c(input$which_region))) +
                            geom_point(aes_string(x = input$which_variable, y = "gdp_per_capita"), 
                                       size = input$point_size, alpha = 0.5) +
                            scale_y_continuous(limits = c(0, 56000)) +
@@ -92,16 +92,15 @@ shinyApp(
 ```
 
 #  Creating Heatmap
-```{r}
+```{r, warning = FALSE, message = FALSE}
 #  Correlation between unemployment and other economic fctors
-#colnames(dat)
-cont_cols <- which(names(dat) %in% 
+cont_cols <- which(names(country_df) %in% 
                       c("unemployment", "net_migration", "pop_density",
                         "gdp_per_capita", "literacy", "agriculture", 
                         "industry", "service"))
-dat_cont <- dat[, cont_cols]
+country_cont <- country_df[, cont_cols]
 # now I need to get rid of NA values
-correlation_matrix <- cor(dat_cont, use = "pairwise.complete.obs")
+correlation_matrix <- cor(country_cont, use = "pairwise.complete.obs")
 
 get_lower_tri<-function(cormat){
     cormat[upper.tri(cormat)] <- NA
@@ -129,5 +128,3 @@ cormat_plot <- ggplot(data = lo_tri, aes(x = Var1, y = Var2, fill = value)) +
   theme(plot.margin = margin(10, 10, 25, 10))
 ggplotly(cormat_plot)
 ```
-
-#  Question: Does all graph have to be interactive?
