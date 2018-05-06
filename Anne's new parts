@@ -1,0 +1,101 @@
+# Creating a new dashboard skin and changing tab names/icons
+
+ui <- dashboardPage(
+  skin = "green",
+  dashboardHeader(title = "315 Interactive Final Project"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Country Count by Region", tabName = "first", icon = icon("globe")),
+      menuItem("GDPs by Region", tabName = "second", icon = icon("money-bill-alt")),
+      menuItem("Compare Country Economic Factors", tabName = "third", icon = icon("dollar-sign")),
+      menuItem("GDP and Unemployment Over Time", tabName = "fourth", icon = icon("money-bill-alt")),
+      menuItem("Regional Relationship between Service and Agriculture", tabName = "fifth", icon = icon("industry")),
+      menuItem("World Map", tabName = "sixth", icon = icon("globe")),
+      menuItem("GDP by Sector", tabName = "seventh", icon = icon("industry")),
+      menuItem("Relational Heat Map", tabName = "eighth", icon = icon("industry"))
+      
+      
+      # Anne's new tab
+      
+      # Second Tab
+      
+      tabItem(tabName = "second",
+              fluidRow(
+                
+                box(checkboxGroupInput("which_region", label = "Which Regions?",
+                                       choices = c("Asia" = "ASIA",
+                                                   "Baltics" = "BALTICS",
+                                                   "Commonwealth of Independent States" = "CIS",
+                                                   "Eastern Europe" = "EASTERN EUROPE",
+                                                   "Latin America/Caribbean" = "LATIN AMER. & CARIB",
+                                                   "Near East" = "NEAR EAST",
+                                                   "Northern Africa" = "NORTHERN AFRICA",
+                                                   "Northern America" = "NORTHERN AMERICA",
+                                                   "Oceania" = "OCEANIA",
+                                                   "Sub-Saharan Africa" = "SUB-SAHARAN AFRICA",
+                                                   "Western Europe" = "WESTERN EUROPE"),
+                                       selected = "ASIA"),
+                    
+                    sliderInput("bandwidth_adjust", label = "Adjust the Bandwidth",
+                                min = 0.1, max = 1, value = 0.8, step = 0.1),
+                    
+                    checkboxInput("show_rug", label = "Display Rug Plot")),
+                box(plotOutput("gdp_density")))),
+      
+      # Third Tab
+      tabItem(tabName = "third",
+              fluidRow(
+                box(selectInput("country", 
+                                label = "Select a country", 
+                                choices = dt["Country"], 
+                                selected = "United States",
+                                multiple = TRUE),
+                    
+                    checkboxGroupInput("variable",
+                                       label = "Select a variable",
+                                       choices = c("Service", "Agriculture", "Industry",
+                                                   "Deathrate", "Birthrate", "Unemployment",
+                                                   "Infant mortality (per 1000 births)", 
+                                                   "GDP ($ per capita)", "Literacy (%)",
+                                                   "Phones (per 1000)"),
+                                       selected = c("GDP ($ per capita)", "Literacy (%)", 
+                                                    "Phones (per 1000)", 
+                                                    "Infant mortality (per 1000 births)"))),
+                box(plotOutput("country_MDS")))),
+                
+                
+                
+                
+                
+#First Tab
+  output$makeup_plot <- renderPlot({
+    
+    p <- ggplot(countries) + geom_bar(aes_string(x = "Region", fill = input$which_variable)) + 
+      labs(title = "Count of Countries per World Region",
+           fill = "") +
+      coord_flip() + 
+      scale_fill_gradient(high = "orangered3", low = "gold") +
+      theme(axis.title = element_text(size = 14), 
+            axis.text = element_text(size = 14), 
+            axis.text.y = element_text(hjust = 0, vjust = 1),
+            title = element_text(size = 18))
+    
+    p
+    
+  })
+  
+  #Second Tab
+  output$gdp_density <- renderPlot({
+    
+    pp <- ggplot(subset(countries, Region %in% c(input$which_region))) + geom_density(aes(x = GDP....per.capita., fill = Region, color = Region), alpha = 0.25, adjust = input$bandwidth_adjust) +
+      labs(title = "Empirical Density of Global GDPs per capita",
+           x = "GDP per Capita (USD)",
+           y = "Density")
+    
+    if(input$show_rug) {
+      pp <- pp + geom_rug(aes(x = GDP....per.capita.)) 
+    }
+    
+    pp
+    
+  })
