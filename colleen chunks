@@ -1,0 +1,116 @@
+# Colleen's 2nd manipulation
+unemployment <- read_csv("https://raw.githubusercontent.com/gunhojung/315_final_project/master/unemployment_rate1.csv")
+unemploymentT <- melt(unemployment)
+unemploymentT$variable <- as.Date(unemploymentT$variable, format = "%Y")
+
+gdp <- read_csv("https://raw.githubusercontent.com/gunhojung/315_final_project/master/gdp_current.csv")
+gdp[2:58] <- gdp[2:58] / 1000000000
+gdp <- subset(gdp, Country %in% unemployment[["Country"]])
+gdpT <- melt(gdp)
+gdpT$variable <- as.Date(gdpT$variable, format = "%Y")
+
+UI
+      # Third Tab
+      tabItem(tabName = "third",
+              fluidRow(
+                box(selectInput("country", 
+                                label = "Select a country", 
+                                choices = dt["Country"], 
+                                selected = "United States",
+                                multiple = TRUE),
+                    
+                    checkboxGroupInput("variable",
+                                       label = "Select a variable",
+                                       choices = c("Service", "Agriculture", "Industry",
+                                                   "Unemployment",
+                                                   "GDP ($ per capita)", "Literacy (%)",
+                                                   "Phones (per 1000)"),
+                                       selected = c("GDP ($ per capita)", "Literacy (%)", 
+                                                    "Phones (per 1000)"))),
+                box(plotOutput("country_MDS")))),
+      
+      # Fourth Tab
+      tabItem(tabName = "fourth",
+              fluidRow(
+                box(selectInput("time_country", label = "Select a country", 
+                                choices = unemployment["Country"], 
+                                selected = "United States",
+                                multiple = TRUE),
+                    
+                    sliderInput("year", label = "Adjust the years",
+                                min = as.Date("1960", format = "%Y"),
+                                max = as.Date("2016", format = "%Y"),
+                                value = c(as.Date("1960", format = "%Y"),
+                                          as.Date("2016", format = "%Y")),
+                                timeFormat = "%Y"),
+                    
+                    radioButtons("type", label = "Variable",
+                                 choices = c("GDP (billions US$)", "Unemployment rate (%)"),
+                                 selected = "GDP (billions US$)")
+                ),
+                box(plotlyOutput("time_series")))),
+      
+Server
+# Third Tab?
+  data <- reactive({
+    country_cont <- dplyr::select(dt, c(input$variable, "Country"))
+    country_cont <- na.omit(country_cont)
+    country_cont_scale <- scale(country_cont[1:length(country_cont)-1])
+    dist_country <- dist(country_cont_scale)
+    country_mds <- cmdscale(dist_country, k = 2)
+    colnames(country_mds) <- c("mds_coordinate_1", "mds_coordinate_2")
+    country_mds <- cbind(country_mds, country_cont["Country"])
+    dt <- left_join(dt, country_mds, by = "Country")
+  })
+  
+  output$country_MDS <- renderPlot({
+    ggplot(subset(data(), Country %in% input$country), 
+           aes(x = mds_coordinate_1, y = mds_coordinate_2, color = Region)) +
+      scale_x_continuous(limits = c(-5, 6)) + scale_y_continuous(limits = c(-3, 5)) +
+      geom_text(aes(label = subset(dt, Country %in% input$country)$Country)) +
+      labs(title = "MDS of economic strength measures on countries, colored by region",
+           x = "MDS coordinate 1",
+           y = "MDS coordinate 2")
+    
+  })
+  
+  
+  # Fourth Tab? 
+  data_2 <- reactive({
+    if (input$type == "GDP (billions US$)") {
+      return(gdpT)
+    }
+    
+    if (input$type == "Unemployment rate (%)") {
+      return(unemploymentT)
+    }
+  })
+  
+  lbls <- reactive({
+    if (input$type == "GDP (billions US$)") {
+      labels <- labs(title = "Time series of GDP (in billions US$) by country", 
+                     x = "Year", y = "GDP (billions US$)")
+      return(labels)
+    }
+    
+    if (input$type == "Unemployment rate (%)") {
+      labels <- labs(title = "Time series of unemployment rate by country",
+                     x = "Year", y = "Unemployment rate (%)")
+    }
+  })
+  
+  output$time_series <- renderPlotly({
+    ff <- ggplot(data = subset(data_2(), Country %in% input$time_country),
+           aes(x = variable, y = value, group = Country, color = Country)) +
+      geom_line() +
+      scale_x_date(limits = c(min(input$year), max(input$year)),
+                   date_labels = "%Y") +
+      lbls() + theme(axis.text = element_text(size = 8), 
+                     axis.title.x = element_text(size = 10),
+                     axis.title.y = element_text(size = 10),
+                     legend.text = element_text(size = 6),
+                     legend.title = element_blank())
+    
+    ggplotly(ff, tooltip = c("y", "group"))
+    
+  })
