@@ -1,0 +1,108 @@
+# Rowechivi Choral Interactive Graphics Group Project Written Overview
+
+### gjung, joonwoob, acrumley, colleenf
+
+## Introduction:
+
+Our dataset examines global economies and the social and economic factors that
+play a role in industry, collected from the World Factbook which is organized by
+the Central Intelligence Agency. Some important variables include Country, 
+Region, GDP Per Capita ($), Agriculture, and Service- although the dataset 
+includes several other variables, we chose to focus solely on those that 
+directly relate to the economy while collecting the data in order to create a cohesive story for our project. To this dataset, we also added data from the International Labour Organization that gave us employment percentages by year 
+for different countries; we felt that this new data would add to our overarching, global economic theme. Each individual row represents economic indicators for a given country. Our dataset has 227 rows and 20 columns, all pertaining to this collection of information.
+
+* Source: https://www.kaggle.com/fernandol/countries-of-the-world/data
+
+* Source: https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS?page=5 
+
+## Walk-through and Design Choices:
+
+When you open our page, you're taken to an introductory tab that explains the purpose of the graphs, and gives you more information about the overall message 
+of our project.
+
+From there, you can click on the tab titled **"World Map."** This page will show
+you an overall map of the globe, and allow you to scroll over different 
+countries to inspect their names and total population. You can also zoom into
+different regions to see the countries up close, and pan around the map to see 
+the sections of the globe that you want to focus on. The graph shows the overall population densities through color, with light yellows pertaining to low 
+densities and dark reds pertaining to higher densities; as one can see, China 
+has the highest population density followed by India and Russia. We chose to 
+create an open map for this tab to allow users to explore the specific regions 
+they wanted, and we chose the colors red and yellow to maintain a cohesive 
+scheme throughout our app.
+
+The next tab is called **"Country Count by Region,"** and breaks down the number
+of countries per region across the world. This bar chart was created to give 
+users a better sense of the overall breakdown of the regions of the world, while clueing them in on the average unemployment rate (%), GDP ($), and population density per region. The biggest takeaways from this graph are that the 
+sub-saharan Africa and Latin America & the Caribbean regions have the most 
+countries (most likely because they include several small countries, rather than just a few large ones). Additionally, Western Europe and Northern America have 
+the highest GDPs, while Asia has the highest population density (as also seen in
+the previous "World Map" tab). As before, we stuck with a red and yellow color-scheme to remain consistent in design across the app, and focused our 
+changing variables on those that we believed pertained to the global economy. 
+
+After this, one can click on the **"GDP by Region"** tab to get a closer look at each region's gross domestic product. Here, one can pick and choose which
+regions to compare within the graph, and change the bandwidth and/or add a rug 
+plot for more information. Each region is colored differently and the alpha 
+level was changed to allow for an easier read. Western Europe and Northern
+Europe have highest-earning economies, while Asia has a higher density of
+economic GDPs at a lower-earning level.
+
+The next tab is called **"Regional Relationships"** and contains a trend line
+plot of the proportion of the Service and Agriculture industry for each selected region. The lines show distinct relationships between Service and Agriculture 
+for each region. We chose to draw a trend line instead of points to display the
+trend easily to the reader.  Furthermore, the check box widget on our app allows
+for easier comparison among the different regions than radio buttons. We can see that Asian, Sub-Saharan countries, especially Baltics and North American 
+countries have a strong negative linear relationship. Notably, the Northern 
+African region is the only one with a strong positive relationship. 
+
+After this tab, one can click on **"GDP by Sector"** for a more in-depth look at
+how the proportions of economic sectors allocated to industry, agriculture, and service affect the overall gross domestic profit. You can choose the three 
+economic sectors (Agriculture, Industry, and Service) and up to three Regions to observe the relationship between proportion of economy devoted to agriculture 
+and GDP per capita. The biggest takeaway from this graph is that when we look at
+most of the regions, we can see a negative relationship between agriculture and 
+GDP overall, while the relationship stays positive for the economic sector of service. We chose to plot a line chart to illustrate the overall trend and color them by region to make it easy to distinguish between lines. We chose to also
+plot the points so that the average view can get a sense of how many countries
+are included in each trend line. However, we chose not to include a confidence 
+band because when more than approximately three regions are selected at a time 
+(our recommended number) the graph becomes muddled and difficult to read.
+
+Next comes the  **"GDP and Unemployment"** tab where you can select countries, 
+the time period of interest, and either unemployment or GDP to adjust the time series plot. It shows the historical trend of the two variables from 1960 to 
+2016. You can add on different countries to compare within the graph, select different time periods of interest, and change the variable of interest as well.
+Interestingly, this time series plot demonstrates an overall increasing GDP for
+the US except for a notable decrease during the 2008 Great Recession. Unlike 
+GDP, which shows a steady increase, the unemployment rate for the US is very volatile; there have been two low points and two high points of unemployment in 
+the past 20 years. We chose to add plotly to this graph because some smaller countries' GDPs become "washed out" when those with larger gross domestic
+profits are chosen; we believe that by using plotly to zoom into the graph, one
+can compare the countries desired while still having a tool to get a closer look
+if necessary.
+
+After this, one can click on the tab, **"Relational Heat Map."** This plot shows
+the correlation measure between different variables in our dataset. You can 
+hover over the different squares, which display hover boxes with the two 
+indicated variables and their correlation. Phones and GDP per capita have a very high correlation (0.83), possibly due to the fact that countries with higher 
+GDPs most likely have higher levels of disposable income and infrastructure in
+place that allows citizens to purchase phones. On the other hand, some 
+negatively correlated variables include GDP per capita and agriculture (-0.59).
+We chose to use a diverging color scheme to show the positive and negative correlations clearly, and we only showed one half of the "pyramid" to make each correlation easier to read.
+
+Our final tab is titled **"Compare Country and Economic Factors."** where you 
+see an MDS plot that shows you the closeness of various countries according to variables of interest. You can add on as many variable as you wish, and pick and choose those which you do and don't care about. When we just look at the a
+griculture industry, we can see that USA and Canada are virtually overlapping. However, adding other variables such as Literacy and Unemployment causes some separation between the two North American countries. We chose to give the user 
+the opportunity to choose the variables that that want because it allows one to 
+only compare the countries based on the variables that they care about.
+
+##Appendix 
+
+Based on our feedback from the last lab, we made several changes to our app. The biggest change was based on the critiques to our overall story, and the cohesiveness of our graphs. Originally, we had no text within our app, and 
+relied only on the graphics to relay our story. However, after receiving the feedback from lab, we chose to incorporate an intro page, as well as individual text boxes onto each tab, to keep the story flowing and to guide the user
+through each graph.
+
+The next major change that we made to our app was to add consistent formatting
+for each tab. This helps to make sure that the user interaction is clearer to follow, and guides the user from graph to graph. We did this by reformatting the placement of each of our boxes and by making sure that each control within the control panel had consistent wording across tabs. For example, before making 
+these changes some control panel titles said "choose a variable," while others 
+said "which variable?" or simply "variable." 
+
+Lastly, we fixed all of the bugs within the interactive graphs that were 
+hindering the user. This included reworking our code so that no matter which options were clicked, one was able to see the resulting graph.
